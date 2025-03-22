@@ -33,7 +33,7 @@ COPY --from=builder /app/web ./web
 COPY --from=builder /app/configs ./configs
 
 # 设置时区
-ENV TZ=Asia/Shanghai
+ENV TZ=Asia/Tokyo
 
 # 暴露端口
 EXPOSE 8080
