@@ -117,6 +117,8 @@ func (c *Client) ListVoices(ctx context.Context, locale string) ([]models.Voice,
 	// 检查缓存是否有效
 	c.voicesCacheMu.RLock()
 	if !c.voicesCacheExpiry.IsZero() && time.Now().Before(c.voicesCacheExpiry) && len(c.voicesCache) > 0 {
+		// 从缓存中获取
+		log.Println("ListVoices 从缓存中获取语音列表: ", len(c.voicesCache), "个", "剩余时间:", c.voicesCacheExpiry.Sub(time.Now()))
 		voices := c.voicesCache
 		c.voicesCacheMu.RUnlock()
 
@@ -135,12 +137,14 @@ func (c *Client) ListVoices(ctx context.Context, locale string) ([]models.Voice,
 	c.voicesCacheMu.RUnlock()
 
 	// 缓存无效，需要从API获取
+	log.Println("ListVoices, 缓存未命中，从API获取语音列表")
 	endpoint, err := c.getEndpoint(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	url := fmt.Sprintf(voicesEndpoint, endpoint["r"])
+	log.Println("ListVoices, endpoint:", endpoint)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
@@ -184,7 +188,7 @@ func (c *Client) ListVoices(ctx context.Context, locale string) ([]models.Voice,
 	// 更新缓存
 	c.voicesCacheMu.Lock()
 	c.voicesCache = voices
-	c.voicesCacheExpiry = time.Now().Add(24 * time.Hour) // 缓存24小时
+	c.voicesCacheExpiry = time.Now().Add(2 * time.Hour) // 缓存 2 小时
 	c.voicesCacheMu.Unlock()
 
 	// 如果指定了locale，则过滤结果
