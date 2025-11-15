@@ -27,3 +27,11 @@ go.work.sum
 
 .DS_Store
 .idea
+
+*/node_modules/
+tmp
+*/package-lock.json
+.serena/
+tts
+.conductor
+.claude
